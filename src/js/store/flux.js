@@ -79,6 +79,21 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} 
 			},
 
+			getOneContact : async (id) => {
+				const options = {
+					method: "GET"
+				};
+				const response = await fetch(url_base+`/${id}`, options);
+				console.log(url_base+`/${id}`);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					return data;
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
 			
 			deleteContact : async (id) => {
 				const options = {
@@ -86,6 +101,31 @@ const getState = ({ getStore, getActions, setStore }) => {
 				};
 				const response = await fetch(`${url_base}/${id}`, options);
 				console.log(`${url_base}/${id}`);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					const contacts = await getActions().getContacts();
+					setStore({"mioAgenda": contacts});
+					localStorage.setItem("contactLocal", JSON.stringify(contacts))
+					location.reload();
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
+			updateContact : async (newContactData) => {
+
+				const options = {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(newContactData)
+				};
+				console.log("Esto es el contact -> ",newContactData);
+				console.log("Esto es id -> ",newContactData.id);
+				const response = await fetch(`${url_base}/${newContactData.id}`, options);
+				console.log(`${url_base}/${newContactData.id}`);
 				if(response.ok) {
 					const data = await response.json();
 					console.log(data);
