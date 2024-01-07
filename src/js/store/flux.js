@@ -1,43 +1,143 @@
 const getState = ({ getStore, getActions, setStore }) => {
+
+
+	const url_base = "https://playground.4geeks.com/apis/fake/contact";
+
+
 	return {
-		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+
+		store:{
+				yesto: "BUENAS",
+				mioAgenda: []
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+			createContact : async (newUser) => {
+				const options = {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(newUser)
 
-				//reset the global store
-				setStore({ demo: demo });
+				};
+				console.log(options.body);
+				const response = await fetch(url_base, options);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					const contacts = await getActions().getContacts();
+					setStore({"mioAgenda": contacts});
+					console.log("My contacts -> ",getStore().mioAgenda);
+					localStorage.setItem("contactLocal", JSON.stringify(contacts))
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
+			// createUserTEST : async (newUser) => {
+			// 	console.log("TEST CREATE USER");
+			// 	console.log(newUser);
+			// 	newUser.forEach(user => () => {
+			// 		console.log(user);
+			// 		console.log("USER");
+			// 	});
+			// 	await newUser.forEach(async (user) => {
+			// 		console.log(user);
+			// 		const options = {
+			// 			method: "POST",
+			// 			headers: {
+			// 				"Content-Type": "application/json"
+			// 			},
+			// 			body: JSON.stringify(user)
+			// 		};
+			// 		console.log(options.body);
+			// 		const response = await fetch(url_base, options);
+			// 		if(response.ok) {
+			// 			const data = response.json();
+			// 			console.log(data);
+			// 			const users = await getActions().getUsers();
+			// 			setStore({"myContacts": users});
+			// 			console.log("DONE -> ", response.status, response.statusText);
+			// 		}else{
+			// 			console.log("ERROR -> ", response.status, response.statusText);
+			// 		} 
+			// 	});
+			// },
+			
+			getContacts : async () => {
+				const options = {
+					method: "GET"
+				};
+				const response = await fetch(url_base+"/agenda/mioAgenda3", options);
+				if(response.ok) {
+					const data = await response.json();
+					console.log("ESTO ES DE GET ",data);
+					return data;
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
+			getOneContact : async (id) => {
+				const options = {
+					method: "GET"
+				};
+				const response = await fetch(url_base+`/${id}`, options);
+				console.log(url_base+`/${id}`);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					return data;
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
+			
+			deleteContact : async (id) => {
+				const options = {
+					method: "DELETE"
+				};
+				const response = await fetch(`${url_base}/${id}`, options);
+				console.log(`${url_base}/${id}`);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					const contacts = await getActions().getContacts();
+					setStore({"mioAgenda": contacts});
+					localStorage.setItem("contactLocal", JSON.stringify(contacts))
+					location.reload();
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
+			},
+
+			updateContact : async (newContactData) => {
+
+				const options = {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(newContactData)
+				};
+				console.log("Esto es el contact -> ",newContactData);
+				console.log("Esto es id -> ",newContactData.id);
+				const response = await fetch(`${url_base}/${newContactData.id}`, options);
+				console.log(`${url_base}/${newContactData.id}`);
+				if(response.ok) {
+					const data = await response.json();
+					console.log(data);
+					const contacts = await getActions().getContacts();
+					setStore({"mioAgenda": contacts});
+					localStorage.setItem("contactLocal", JSON.stringify(contacts))
+					location.reload();
+				}else{
+					console.log("ERROR -> ", response.status, response.statusText);
+				} 
 			}
+
 		}
 	};
 };
